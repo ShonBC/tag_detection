@@ -15,3 +15,6 @@ pip3 install numpy
 
 # Install Python YAML
 pip install pyyaml
+
+# Install Imutils
+pip install imutils
