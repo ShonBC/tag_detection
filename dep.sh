@@ -14,7 +14,7 @@ pip3 install apriltag
 pip3 install numpy
 
 # Install Python YAML
-pip install pyyaml
+pip3 install pyyaml
 
 # Install Imutils
-pip install imutils
+pip3 install imutils
