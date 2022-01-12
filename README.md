@@ -22,14 +22,14 @@ Run the camera calibration script to generate a yaml file containing the camera 
     python3 cam_calibration.py
 
 # ArUco
-ArUco tags have many useful applications. More information can be found [here](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html). This module was designed to detect, decode, and estimate the position and orientation of ArUco Tags seen be a camera using OpenCV. The tags being used should be measured and their size updated in the code. The EstimatePose() function has a variable "marker_size" which should be updated to match the actual length of the one of the tag's edges in meters. ArUco Markers can be generated [here](https://chev.me/arucogen/). Detect the default ArUco Tag type by running:
+ArUco tags have many useful applications. More information can be found [here](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html). This module was designed to detect, decode, and estimate the position and orientation of ArUco Tags seen be a camera using OpenCV. The tags will be outlined and have their ID's overladed in the frame along with x, y, z axises drawn. All tags detected will have their ID, translation, and rotation vectors printed to the terminal. The tags being used should be measured and their size updated in the code. The EstimatePose() function has a variable "marker_size" which should be updated to match the actual length of the one of the tag's edges in meters. ArUco Markers can be generated [here](https://chev.me/arucogen/). Detect the default ArUco Tag type by running:
 
-    python aruco_pos.py
+    python3 aruco_pos.py
 
 Change tag type by running:
 
-    python aruco_pos.py -t {TAG_TYPE}
+    python3 aruco_pos.py -t {TAG_TYPE}
 
 For example:
 
-    python aruco_pos.py -t DICT_4X4_50
+    python3 aruco_pos.py -t DICT_4X4_50
