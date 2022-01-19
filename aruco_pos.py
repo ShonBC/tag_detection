@@ -5,6 +5,7 @@ import argparse
 import time
 from imutils.video import VideoStream
 import yaml
+from scipy.spatial.transform import Rotation as R
 
 def DrawMarkers(frame, corners, ids):
 
@@ -52,9 +53,15 @@ def EstimatePose(frame, ids, camera_matrix,dst, corners):
 		# Estimate Pos of all markers
 		for i in range(len(ids)):  # Iterate in markers
 			marker_size = 0.0635 # meters
+			# marker_size = 2.5 # inches
 			rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(corners[i], marker_size, camera_matrix, dst)
 			cv2.aruco.drawAxis(frame, camera_matrix, dst, rvecs_markers, tvecs_markers, 0.05)  # Draw Axis
+			r_mat = cv2.Rodrigues(rvecs_markers)[0]
+			r = R.from_matrix(r_mat)
+			quat = r.as_quat()
 			print(f'Rotation Vectors: {rvecs_markers}')
+			print(f'Rotation Matrix: {r_mat}')
+			print(f'Quaternion: {quat}')
 			print(f'Translation Vectors: {tvecs_markers}')
 
 if __name__ == '__main__':
