@@ -67,7 +67,7 @@ def EstimatePose(frame, ids, camera_matrix,dst, corners):
 if __name__ == '__main__':
 		
 	# Read YAML file fro Camera Calibration info
-	with open("calibration_matrix.yaml", 'r') as stream:
+	with open("calibration_matrix_test.yaml", 'r') as stream:
 		data_loaded = yaml.safe_load(stream)
 
 	camera_matrix = np.asarray(data_loaded['camera_matrix']) # Camera Matrix
@@ -122,12 +122,14 @@ if __name__ == '__main__':
 
 	# Initialize the video stream and allow the camera sensor to warm up
 	print("[INFO] starting video stream...")
-	vs = VideoStream(src=0).start()
+	# vs = VideoStream(src=0).start()
+	cap = cv2.VideoCapture(0)
 	time.sleep(2.0)
 
 	while True:
 		# Get frame from threaded video stream
-		frame = vs.read()
+		# frame = vs.read()
+		ret, frame = cap.read()
 
 		# Detect ArUco markers
 		(corners, ids, rejected) = cv2.aruco.detectMarkers(frame,
@@ -145,4 +147,5 @@ if __name__ == '__main__':
 
 	# Close windows and end video stream
 	cv2.destroyAllWindows()
-	vs.stop()
+	# vs.stop()
+	cap.release()
