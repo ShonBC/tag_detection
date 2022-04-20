@@ -1,6 +1,5 @@
-from tkinter import Frame
+
 import cv2
-from torch import frac
 
 cap = cv2.VideoCapture(0)
 

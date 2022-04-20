@@ -11,17 +11,19 @@ chess_height = 5
 
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
 objp = np.zeros((chess_width * chess_height, 3), np.float32)
-objp[:,:2] = np.mgrid[0:chess_width, 0:chess_height].T.reshape(-1,2)
+objp[:, :2] = np.mgrid[0:chess_width, 0:chess_height].T.reshape(-1, 2)
 
 # Arrays to store object points and image points from all the images.
-objpoints = [] # 3d point in real world space
-imgpoints = [] # 2d points in image plane.
+objpoints = []  # 3d point in real world space
+imgpoints = []  # 2d points in image plane.
 
 # cap = cv.VideoCapture('out.mp4')
 cap = cv.VideoCapture(0)
 
-if(cap.isOpened() == False):
+if(cap.isOpened() is False):
     print('Error opening video stream of file')
+
+cal_counter = 0
 
 while True:
     ret, frame = cap.read()
@@ -30,33 +32,52 @@ while True:
 
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-        found, corners = cv.findChessboardCorners(gray, (chess_height, chess_width), None)
+        found, corners = cv.findChessboardCorners(gray,
+                                                  (chess_height,
+                                                   chess_width),
+                                                  None)
 
-        if found == True:
+        if found is True:
             objpoints.append(objp)
-            corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            imgpoints.append(corners)
+            corners2 = cv.cornerSubPix(gray,
+                                       corners,
+                                       (11, 11),
+                                       (-1, -1),
+                                       criteria)
+            imgpoints.append(corners2)
 
-            cv.drawChessboardCorners(frame, (chess_width, chess_height), corners2, found)
+            cv.drawChessboardCorners(frame,
+                                     (chess_width, chess_height),
+                                     corners2,
+                                     found)
             cv.imshow('frame', frame)
 
             height, width = gray.shape[:2]
             # Camera Calibration
-            ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
+            ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints,
+                                                              imgpoints,
+                                                              (width, height),
+                                                              None,
+                                                              None)
+            cal_counter += 1
             print('Cam Calibration')
 
             # Refine Camera Matrix
-            ref_cam_mtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (width, height), 1, (width, height))
+            ref_cam_mtx, roi = cv.getOptimalNewCameraMatrix(mtx,
+                                                            dist,
+                                                            (width, height),
+                                                            1,
+                                                            (width, height))
             print('Cam Matrix Refined')
 
-            # Transform the matrix and distortion coefficients to writable lists
+            # Transform the matrix & distortion coefficients to writable lists
             data = {'camera_matrix': np.asarray(ref_cam_mtx).tolist(),
                     'dist_coeff': np.asarray(dist).tolist(),
                     'rvecs': np.asarray(rvecs).tolist(),
                     'tvecs': np.asarray(tvecs).tolist()}
 
             # Save calibration parameters to a yaml file
-            with open("calibration_matrix_test.yaml", "w") as f:
+            with open("calibration_matrix_corners2.yaml", "w") as f:
                 yaml.dump(data, f)
 
         if cv.waitKey(10) == 27:
@@ -66,3 +87,4 @@ while True:
 
 cv.destroyAllWindows()
 print('Destroyed all windows')
+print(f'Cal_Counter: {cal_counter}')

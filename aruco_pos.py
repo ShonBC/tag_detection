@@ -7,6 +7,7 @@ from imutils.video import VideoStream
 import yaml
 from scipy.spatial.transform import Rotation as R
 
+
 def DrawMarkers(frame, corners, ids):
 
 	# Verify *at least* one ArUco marker was detected
@@ -29,8 +30,8 @@ def DrawMarkers(frame, corners, ids):
 			bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
 			bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
 			topLeft = (int(topLeft[0]), int(topLeft[1]))
-
-            # Draw the bounding box of the ArUCo detection
+			
+			# Draw the bounding box of the ArUCo detection
 			cv2.line(frame, topLeft, topRight, (0, 255, 0), 2)
 			cv2.line(frame, topRight, bottomRight, (0, 255, 0), 2)
 			cv2.line(frame, bottomRight, bottomLeft, (0, 255, 0), 2)
@@ -43,44 +44,67 @@ def DrawMarkers(frame, corners, ids):
 			cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
 			
 			# Draw the ArUco marker ID on the frame
-			cv2.putText(frame, str(markerID),
-				(topLeft[0], topLeft[1] - 15),
-				cv2.FONT_HERSHEY_SIMPLEX,
-				0.5, (0, 255, 0), 2)
+			cv2.putText(
+						frame,
+						str(markerID),
+						(topLeft[0], topLeft[1] - 15),
+						cv2.FONT_HERSHEY_SIMPLEX,
+						0.5,
+						(0, 255, 0),
+						2)
 
-def EstimatePose(frame, ids, camera_matrix,dst, corners):
+
+def EstimatePose(frame, ids, camera_matrix, dst, corners):
 	if np.all(ids is not None):  # If there are markers found by detector
+
+		marker_size = 0.0635  # meters
+		# marker_size = 2.5 # inches
+		rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(
+																				corners,
+																				marker_size,
+																				camera_matrix,
+																				dst)
+
 		# Estimate Pos of all markers
-		for i in range(len(ids)):  # Iterate in markers
-			marker_size = 0.0635 # meters
-			# marker_size = 2.5 # inches
-			rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(corners[i], marker_size, camera_matrix, dst)
-			cv2.aruco.drawAxis(frame, camera_matrix, dst, rvecs_markers, tvecs_markers, 0.05)  # Draw Axis
-			r_mat = cv2.Rodrigues(rvecs_markers)[0]
-			r = R.from_matrix(r_mat)
-			quat = r.as_quat()
-			print(f'Rotation Vectors: {rvecs_markers}')
-			print(f'Rotation Matrix: {r_mat}')
-			print(f'Quaternion: {quat}')
+		for i in range(len(tvecs_markers)):  # Iterate in markers
+			# marker_size = 0.0635 # meters
+			# # marker_size = 2.5 # inches
+			# rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(corners[i], marker_size, camera_matrix, dst)
+			cv2.aruco.drawAxis(
+							frame,
+							camera_matrix,
+							dst,
+							rvecs_markers[i],
+							tvecs_markers[i],
+							0.05)  # Draw Axis
+
+			# r_mat = cv2.Rodrigues(rvecs_markers)[0]
+			# r = R.from_matrix(r_mat)
+			# quat = r.as_quat()
+			# print(f'Rotation Vectors: {rvecs_markers}')
+			# print(f'Rotation Matrix: {r_mat}')
+			# print(f'Quaternion: {quat}')
 			print(f'Translation Vectors: {tvecs_markers}')
 
+
 if __name__ == '__main__':
-		
+
 	# Read YAML file fro Camera Calibration info
-	with open("calibration_matrix_test.yaml", 'r') as stream:
+	with open("calibration_matrix_corners2.yaml", 'r') as stream:
 		data_loaded = yaml.safe_load(stream)
 
-	camera_matrix = np.asarray(data_loaded['camera_matrix']) # Camera Matrix
-	dst = np.asarray(data_loaded['dist_coeff']) # Distortion coefficients
-	rvecs = np.asarray(data_loaded['rvecs']) # Rotation Vectors
-	tvecs = np.asarray(data_loaded['tvecs']) # Translation Vectors
-
+	camera_matrix = np.asarray(data_loaded['camera_matrix'])  # Camera Matrix
+	dst = np.asarray(data_loaded['dist_coeff'])  # Distortion coefficients
+	rvecs = np.asarray(data_loaded['rvecs'])  # Rotation Vectors
+	tvecs = np.asarray(data_loaded['tvecs'])  # Translation Vectors
 
 	# Construct the argument parser and parse the arguments
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-t", "--type", type=str,
-		default="DICT_ARUCO_ORIGINAL",
-		help="type of ArUCo tag to detect")
+	ap.add_argument(
+					"-t",
+					"--type", type=str,
+					default="DICT_ARUCO_ORIGINAL",
+					help="type of ArUCo tag to detect")
 	args = vars(ap.parse_args())
 
 	# Define names possible ArUco tags OpenCV supports
