@@ -58,7 +58,7 @@ def EstimatePose(frame, ids, camera_matrix, dst, corners):
 	if np.all(ids is not None):  # If there are markers found by detector
 
 		marker_size = 0.0635  # meters
-		# marker_size = 2.5 # inches
+		# marker_size = 2.5  # inches
 		rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(
 																				corners,
 																				marker_size,
@@ -66,9 +66,9 @@ def EstimatePose(frame, ids, camera_matrix, dst, corners):
 																				dst)
 
 		# Estimate Pos of all markers
-		for i in range(len(tvecs_markers)):  # Iterate in markers
-			# marker_size = 0.0635 # meters
-			# # marker_size = 2.5 # inches
+		for i in range(0, len(ids)):  # Iterate in markers
+			# marker_size = 0.0635  # meters
+			# marker_size = 2.5  # inches
 			# rvecs_markers, tvecs_markers, _ = cv2.aruco.estimatePoseSingleMarkers(corners[i], marker_size, camera_matrix, dst)
 			cv2.aruco.drawAxis(
 							frame,
@@ -76,7 +76,7 @@ def EstimatePose(frame, ids, camera_matrix, dst, corners):
 							dst,
 							rvecs_markers[i],
 							tvecs_markers[i],
-							0.05)  # Draw Axis
+							1)  # Draw Axis
 
 			# r_mat = cv2.Rodrigues(rvecs_markers)[0]
 			# r = R.from_matrix(r_mat)
@@ -95,8 +95,8 @@ if __name__ == '__main__':
 
 	camera_matrix = np.asarray(data_loaded['camera_matrix'])  # Camera Matrix
 	dst = np.asarray(data_loaded['dist_coeff'])  # Distortion coefficients
-	rvecs = np.asarray(data_loaded['rvecs'])  # Rotation Vectors
-	tvecs = np.asarray(data_loaded['tvecs'])  # Translation Vectors
+	# rvecs = np.asarray(data_loaded['rvecs'])  # Rotation Vectors
+	# tvecs = np.asarray(data_loaded['tvecs'])  # Translation Vectors
 
 	# Construct the argument parser and parse the arguments
 	ap = argparse.ArgumentParser()
@@ -156,11 +156,11 @@ if __name__ == '__main__':
 		ret, frame = cap.read()
 
 		# Detect ArUco markers
-		(corners, ids, rejected) = cv2.aruco.detectMarkers(frame,
+		corners, ids, rejected = cv2.aruco.detectMarkers(frame,
 			arucoDict, parameters=arucoParams)
-		
-		DrawMarkers(frame, corners, ids) # Draw and label detected markers
-		EstimatePose(frame, ids, camera_matrix, dst, corners) # Draw axis and print pose estimate of detected markers
+		if np.all(ids != None):
+			DrawMarkers(frame, corners, ids) # Draw and label detected markers
+			EstimatePose(frame, ids, camera_matrix, dst, corners) # Draw axis and print pose estimate of detected markers
 
 		# Show output frame
 		cv2.imshow("Frame", frame)
