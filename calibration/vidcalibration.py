@@ -6,7 +6,6 @@ import yaml
 
 def ReprojectionError(imgpoints, objpoints, mtx, dist, rvecs, tvecs):
 
-    total_points = 0
     total_err = 0
     # view_err.resize(objpoints.size())
 
@@ -17,16 +16,11 @@ def ReprojectionError(imgpoints, objpoints, mtx, dist, rvecs, tvecs):
                                           mtx,
                                           dist)
 
-        err = linalg.norm([imgpoints[i], new_points], ord=2)
+        err = cv2.norm(imgpoints[i], new_points, cv2.NORM_L2) / len(new_points)
 
-        num_points = objpoints[i].size()
+        total_err += err
 
-        # view_err[i] = np.sqrt(err * err / num_points)
-
-        total_err += err * err
-        total_points += num_points
-
-    return np.sqrt(total_err / total_points)
+    return np.sqrt(total_err / len(objpoints))
 
 
 def Calibrate():
@@ -91,6 +85,7 @@ def Calibrate():
                                                                    None,
                                                                    None)
                 cal_counter += 1
+                print(f'Cal Count: {cal_counter}')
                 print('Cam Calibration')
 
                 # Refine Camera Matrix
@@ -106,20 +101,28 @@ def Calibrate():
                 view_err = ReprojectionError(imgpoints, objpoints, mtx, dist, rvecs, tvecs)
 
                 # Transform matrix & distortion coefficients to writable lists
+                # data = {'camera_matrix': np.asarray(ref_cam_mtx).tolist(),
+                #         'dist_coeff': np.asarray(dist).tolist(),
+                #         'rvecs': np.asarray(rvecs).tolist(),
+                #         'tvecs': np.asarray(tvecs).tolist()}
+
                 data = {'camera_matrix': np.asarray(ref_cam_mtx).tolist(),
-                        'dist_coeff': np.asarray(dist).tolist(),
-                        'rvecs': np.asarray(rvecs).tolist(),
-                        'tvecs': np.asarray(tvecs).tolist()}
+                        'dist_coeff': np.asarray(dist).tolist()}
 
                 # Save calibration parameters to a yaml file
                 with open("calibration_matrix_corners2.yaml", "w") as f:
                     yaml.dump(data, f)
-                
-                if view_err > 0.90:
-                    print('Done Calibrating')
+                print(f'Calibrating Error: {view_err}')
+                if view_err < 0.90:
+                    print(f'Done Calibrating Error: {view_err}')
                     break
 
-            if cv2.waitKey(10) == 27:
+            else:
+                cv2.imshow('frame', frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            # If `q` key was pressed, break from the loop
+            if key == ord("q"):
                 break
         else:
             break
@@ -127,6 +130,7 @@ def Calibrate():
     cv2.destroyAllWindows()
     print('Destroyed all windows')
     print(f'Cal_Counter: {cal_counter}')
+    print(f'Calibrating Error: {view_err}')
 
 
 if __name__ == '__main__':
