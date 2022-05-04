@@ -28,8 +28,8 @@ def Calibrate():
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
     # Calibration chessboard size
-    chess_width = 6
-    chess_height = 5
+    chess_width = 9
+    chess_height = 6
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((chess_width * chess_height, 3), np.float32)
@@ -62,6 +62,7 @@ def Calibrate():
                                                        None)
 
             if found is True:
+                cal_counter += 1
                 objpoints.append(objp)
                 corners2 = cv2.cornerSubPix(gray,
                                             corners,
@@ -75,6 +76,7 @@ def Calibrate():
                                           corners2,
                                           found)
                 cv2.imshow('frame', frame)
+                cv2.imwrite(f'cal_{cal_counter}.jpg', frame)
 
                 height, width = gray.shape[:2]
                 # Camera Calibration
@@ -84,7 +86,7 @@ def Calibrate():
                                                                     height),
                                                                    None,
                                                                    None)
-                cal_counter += 1
+
                 print(f'Cal Count: {cal_counter}')
                 print('Cam Calibration')
 

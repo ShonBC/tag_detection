@@ -90,7 +90,7 @@ def EstimatePose(frame, ids, camera_matrix, dst, corners):
 if __name__ == '__main__':
 
 	# Read YAML file fro Camera Calibration info
-	with open("calibration_matrix_corners2.yaml", 'r') as stream:
+	with open("calibration_matrix3.yaml", 'r') as stream:
 		data_loaded = yaml.safe_load(stream)
 
 	camera_matrix = np.asarray(data_loaded['camera_matrix'])  # Camera Matrix
